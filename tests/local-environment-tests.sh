@@ -543,9 +543,9 @@ test_permissions() {
 
 # Prints aggregated test results and appends summary to the report.
 test_summary() {
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║                    Test Summary                                 ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}==============================${NC}"
+    echo -e "${BLUE}Test Summary${NC}"
+    echo -e "${BLUE}==============================${NC}"
     echo ""
     echo "  Total Tests:   $TESTS_RUN"
     
@@ -583,9 +583,8 @@ test_summary() {
 
 # Entry point for full local environment validation.
 main() {
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║         Local Environment Tests for Flatpak Development        ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════════╝${NC}"
+    echo -e "${BLUE}Local Environment Tests for Flatpak Development${NC}"
+    echo -e "${BLUE}==============================================${NC}"
     echo ""
     
     test_environment_requirements

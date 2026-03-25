@@ -4,7 +4,7 @@
 
 - name: Deploy Nextcloud Docker Stack
   hosts: all
-  become: yes
+  become: true
   vars:
     project_root: /opt/nextcloud-docker-stack
     app_user: nextcloud-app
@@ -76,8 +76,8 @@
         repo: "{{ repository_url | default('https://github.com/your-repo/nextcloud-docker-stack.git') }}"
         dest: "{{ project_root }}"
         version: "{{ branch | default('main') }}"
-        update: yes
-        force: yes
+        update: true
+        force: true
 
     # ========================================================================
     # USER SETUP
@@ -90,7 +90,7 @@
         group: "{{ app_user }}"
         shell: /sbin/nologin
         home: /var/lib/{{ app_user }}
-        createhome: yes
+        createhome: true
         state: present
 
     - name: Create rootless user (if enabled)
@@ -98,7 +98,7 @@
         name: "{{ rootless_user }}"
         uid: 5001
         shell: /bin/bash
-        createhome: yes
+        createhome: true
         state: present
       when: enable_rootless | default(true)
 
@@ -111,8 +111,8 @@
         src: "{{ project_root }}/.env.example"
         dest: "{{ project_root }}/.env.secure"
         mode: '0600'
-        backup: yes
-      ignore_errors: yes
+        backup: true
+      ignore_errors: true
 
     - name: Update environment variables
       lineinfile:
@@ -120,7 +120,7 @@
         regexp: "^{{ item.key }}="
         line: "{{ item.key }}={{ item.value }}"
       loop: "{{ env_vars | dict2items }}"
-      no_log: True
+      no_log: true
 
     - name: Fix .env.secure permissions
       file:
@@ -182,7 +182,7 @@
     - name: Enable systemd service
       systemd:
         name: nextcloud-stack
-        enabled: yes
+        enabled: true
         state: started
 
     # ========================================================================

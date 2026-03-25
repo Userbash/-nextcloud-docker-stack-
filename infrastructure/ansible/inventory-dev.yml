@@ -1,3 +1,4 @@
+---
 # Nextcloud Ansible Inventory for Development Environment
 [development]
 dev-app ansible_host=localhost ansible_connection=local

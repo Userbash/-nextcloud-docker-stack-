@@ -1,3 +1,4 @@
+---
 # Nextcloud Ansible Inventory for Production Environment
 [production]
 prod-app1 ansible_host=prod-app1.example.com

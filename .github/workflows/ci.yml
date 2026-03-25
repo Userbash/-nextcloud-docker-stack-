@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Run ShellCheck
         run: |
@@ -31,7 +31,7 @@ jobs:
           find . -type d -name '.git' -prune -o -type f \( -name '*.yaml' -o -name '*.yml' \) -print0 2>/dev/null | xargs -0 -r yamllint || echo "Yamllint found issues, but continuing..."
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.10"
 

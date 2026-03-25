@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # scripts/run-ci-local.sh
-# Fully automated local CI runner using 'act'.
-# No user input required.
+# Runs the local CI lint job using 'act' and stores diagnostics.
 
 set -euo pipefail
 
-# Colors
+# Colors for readable terminal output.
 GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 YELLOW='\033[1;33m'

@@ -23,29 +23,29 @@ NC='\033[0m'
 
 # Prints a framed title block to visually separate major phases.
 print_header() {
-    echo -e "\n${CYAN}╔══════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${CYAN}║ $1$(printf '%*s' "$((56 - ${#1}))" "" | tr ' ' ' ')║${NC}"
-    echo -e "${CYAN}╚══════════════════════════════════════════════════════════╝${NC}\n"
+    echo -e "\n${CYAN}========================================================${NC}"
+    echo -e "${CYAN}$1${NC}"
+    echo -e "${CYAN}========================================================${NC}\n"
 }
 
 # Prints a section label for the current operation.
 print_section() {
-    echo -e "${BLUE}▶ $1${NC}"
+    echo -e "${BLUE}[SECTION] $1${NC}"
 }
 
 # Prints a success message in green.
 print_success() {
-    echo -e "${GREEN}✅ $1${NC}"
+    echo -e "${GREEN}[OK] $1${NC}"
 }
 
 # Prints an error message in red.
 print_error() {
-    echo -e "${RED}❌ $1${NC}"
+    echo -e "${RED}[ERROR] $1${NC}"
 }
 
 # Prints an informational message in yellow.
 print_info() {
-    echo -e "${YELLOW}ℹ️  $1${NC}"
+    echo -e "${YELLOW}[INFO] $1${NC}"
 }
 
 # ============ ENVIRONMENT CHECKS ============
@@ -210,9 +210,8 @@ quick_health_check() {
 show_menu() {
     cat << EOF
 
-${CYAN}╔════════════════════════════════════════════════════════════╗${NC}
-${CYAN}║  NEXTCLOUD DOCKER STACK - TESTING & TROUBLESHOOTING SUITE  ║${NC}
-${CYAN}╚════════════════════════════════════════════════════════════╝${NC}
+${CYAN}Nextcloud Docker Stack - Testing and Troubleshooting Suite${NC}
+${CYAN}==========================================================${NC}
 
 ${GREEN}Usage:${NC}
   ./run_tests.sh [COMMAND] [OPTIONS]
