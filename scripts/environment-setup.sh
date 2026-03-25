@@ -194,6 +194,7 @@ detect_environment() {
     # Detect Linux distribution
     if [ "$DETECTED_OS" == "Linux" ]; then
         if [ -f /etc/os-release ]; then
+            # shellcheck source=/etc/os-release
             . /etc/os-release
             DETECTED_DISTRO="$ID"
             log_info "Distribution: $ID (Version: $VERSION_ID)"
@@ -481,6 +482,28 @@ EOF
 }
 
 # ============================================================================
+# OPTIONAL PORTAINER SETUP
+# ============================================================================
+
+setup_portainer_optional() {
+    if [ "$INSTALL_PORTAINER" != "true" ]; then
+        log_info "Portainer setup skipped (--skip-portainer)"
+        return
+    fi
+
+    if [ -x "$PROJECT_ROOT/scripts/setup-portainer.sh" ]; then
+        log_info "Running optional Portainer setup script..."
+        if bash "$PROJECT_ROOT/scripts/setup-portainer.sh" --skip-checks; then
+            log_success "Portainer setup completed"
+        else
+            log_warning "Portainer setup failed. You can run scripts/setup-portainer.sh manually later"
+        fi
+    else
+        log_warning "Portainer setup script not found at scripts/setup-portainer.sh"
+    fi
+}
+
+# ============================================================================
 # FINAL VERIFICATION AND REPORTING
 # ============================================================================
 
@@ -543,6 +566,7 @@ main() {
     setup_rootless_mode
     setup_security_hardening
     setup_systemd_services
+    setup_portainer_optional
     generate_security_report
     
     echo ""

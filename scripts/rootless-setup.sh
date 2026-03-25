@@ -22,7 +22,6 @@ set -e
 # CONFIGURATION
 # ============================================================================
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOTLESS_USER="nextcloud-rootless"
 ROOTLESS_UID=5001
 ROOTLESS_GID=5001

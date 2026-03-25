@@ -173,6 +173,7 @@ echoerr() {
   echo "$@" 1>&2
 }
 log_prefix() {
+  # shellcheck disable=SC2317
   echo "$0"
 }
 _logp=6
