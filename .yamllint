@@ -1,0 +1,13 @@
+extends: default
+
+ignore:
+  - data/**
+  - test-reports/**
+  - infrastructure/ansible/inventory-dev.yml
+  - infrastructure/ansible/inventory-prod.yml
+
+rules:
+  line-length: disable
+  trailing-spaces: disable
+  braces: disable
+  brackets: disable

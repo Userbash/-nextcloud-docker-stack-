@@ -42,7 +42,7 @@ run_yaml_lint() {
     fi
 
     echo "[yaml] Files to check: ${#YAML_FILES[@]}"
-    yamllint -s "${YAML_FILES[@]}"
+    yamllint -s -c .yamllint "${YAML_FILES[@]}"
 }
 
 # Entry point for YAML validation.

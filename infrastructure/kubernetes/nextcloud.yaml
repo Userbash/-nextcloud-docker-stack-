@@ -211,8 +211,8 @@ metadata:
   namespace: nextcloud
 spec:
   ports:
-  - port: 6379
-    targetPort: 6379
+    - port: 6379
+      targetPort: 6379
   selector:
     app: redis
 
