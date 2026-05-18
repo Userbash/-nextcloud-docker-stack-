@@ -42,7 +42,6 @@ check_tool "git" "Git" || missing=$((missing+1))
 echo ""
 echo -e "${YELLOW}OPTIONAL SERVICES (for full functionality):${NC}"
 
-check_tool "nginx" "Nginx (Web Server)" || echo -e "${YELLOW}  ⚠ Optional: use PHP dev server instead${NC}"
 check_tool "php-fpm" "PHP-FPM" || echo -e "${YELLOW}  ⚠ Optional: PHP-FPM for production-like setup${NC}"
 check_tool "redis-cli" "Redis CLI" || echo -e "${YELLOW}  ⚠ Optional: for caching${NC}"
 check_tool "psql" "PostgreSQL CLI" || echo -e "${YELLOW}  ⚠ Optional: for database access${NC}"

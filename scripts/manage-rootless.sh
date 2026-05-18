@@ -40,7 +40,7 @@ ${BLUE}CONTAINER MANAGEMENT:${NC}
 
 ${BLUE}LOGS:${NC}
   logs          Show all logs (follow mode)
-  logs <name>   Show logs for service (db, redis, app, nginx, certbot)
+  logs <name>   Show logs for service (db, redis, app, traefik, certbot)
 
 ${BLUE}OPERATIONS:${NC}
   backup        Run backup manually
@@ -146,7 +146,7 @@ case "${1:-help}" in
     
     shell)
         if [ -z "${2:-}" ]; then
-            echo -e "${RED}❌ Specify container: db, redis, app, or nginx${NC}"
+            echo -e "${RED}❌ Specify container: db, redis, app, or traefik${NC}"
             exit 1
         fi
         SERVICE="${2}"

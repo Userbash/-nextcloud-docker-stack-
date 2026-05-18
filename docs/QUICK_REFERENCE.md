@@ -104,8 +104,6 @@ All the commands you need day-to-day, in one place.
 | Check certificate expiry | `openssl x509 -enddate -noout -in config/ssl/fullchain.pem` |
 | Check certificate details | `openssl x509 -text -noout -in config/ssl/fullchain.pem` |
 | Test HTTPS | `curl -v https://your-domain.com` |
-| Renew (Certbot container) | `docker-compose exec certbot certbot renew --force-renewal` |
-| Renew (host certbot) | `sudo certbot renew --nginx` |
 | Generate self-signed cert | `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout config/ssl/privkey.pem -out config/ssl/fullchain.pem -subj "/CN=localhost"` |
 
 ---

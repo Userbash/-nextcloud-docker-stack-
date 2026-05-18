@@ -64,17 +64,12 @@ def get_local_config():
     
     config = {
         'env': read_local_env(),
-        'nginx_config': None,
         'php_config': None,
         'redis_config': None,
         'db_schema': None,
     }
     
     # Read config files
-    nginx_file = os.path.join(project_root, 'config/local/nginx.conf')
-    if os.path.exists(nginx_file):
-        with open(nginx_file, 'r') as f:
-            config['nginx_config'] = f.read()
     
     php_file = os.path.join(project_root, 'config/local/php-fpm.conf')
     if os.path.exists(php_file):
@@ -173,10 +168,6 @@ def export_configs(output_dir=None):
     config_export_dir = os.path.join(output_dir, f'config-export-{timestamp}')
     os.makedirs(config_export_dir, exist_ok=True)
     
-    if local_config['nginx_config']:
-        nginx_export = os.path.join(config_export_dir, 'nginx.conf')
-        with open(nginx_export, 'w') as f:
-            f.write(local_config['nginx_config'])
         print_success(f"Nginx config exported")
     
     if local_config['php_config']:

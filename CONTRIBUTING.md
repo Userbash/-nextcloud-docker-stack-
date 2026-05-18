@@ -150,7 +150,6 @@ nextcloud-docker-stack/
 ├── docs/                 # Documentation
 ├── scripts/              # Management scripts
 ├── config/               # Configuration files
-├── nginx/                # Nginx configuration
 ├── php/                  # PHP configuration
 ├── docker-compose.yaml   # Main compose file
 ├── .env.example          # Environment template

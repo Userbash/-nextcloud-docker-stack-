@@ -205,7 +205,7 @@ openssl x509 -in config/ssl/fullchain.pem -noout -enddate
 openssl x509 -in config/ssl/fullchain.pem -noout -subject
 
 # Restart to reload
-docker-compose restart nginx
+docker-compose restart traefik
 ```
 
 ### Rootless isn't working

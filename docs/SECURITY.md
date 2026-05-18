@@ -111,7 +111,7 @@ docker-compose logs | grep -i failed
 
 # See what happened
 docker-compose logs -f app
-docker-compose logs -f nginx
+docker-compose logs -f traefik
 ```
 
 ## If something leaks

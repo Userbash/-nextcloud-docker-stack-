@@ -115,7 +115,7 @@ real credentials.
 ## Phase 5 — Verify the Deployment
 
 1. In Portainer navigate to **Containers**.
-2. Confirm that every Nextcloud stack container (`db`, `app`, `redis`, `nginx`, etc.) shows
+2. Confirm that every Nextcloud stack container (`db`, `app`, `redis`, `traefik`, etc.) shows
    status **Running**.
 3. Open your Nextcloud instance:
    - Development: `https://localhost:8443`
