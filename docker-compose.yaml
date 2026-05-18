@@ -1,14 +1,39 @@
----
 version: '3.8'
 
 services:
-  # PostgreSQL Database
+  traefik:
+    image: traefik:v3.0
+    container_name: nextcloud-traefik
+    restart: unless-stopped
+    command:
+      - --api.insecure=false
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge=true
+      - --certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web
+      - --certificatesresolvers.letsencrypt.acme.email=${LETSENCRYPT_EMAIL}
+      - --certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json
+    ports:
+      - 8443:443
+      - 8080:80
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - traefik_certs:/letsencrypt:Z
+    networks:
+      - nextcloud_network
+    security_opt:
+      - no-new-privileges:true
+
   db:
     image: docker.io/library/postgres:16-alpine
     container_name: nextcloud-db
     restart: always
     volumes:
-      - db_data:/var/lib/postgresql/data
+      - db_data:/var/lib/postgresql/data:Z
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -23,14 +48,13 @@ services:
     security_opt:
       - no-new-privileges:true
 
-  # Redis Cache
   redis:
     image: docker.io/library/redis:7-alpine
     container_name: nextcloud-redis
     restart: always
     command: redis-server --appendonly yes
     volumes:
-      - redis_data:/data
+      - redis_data:/data:Z
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
@@ -41,9 +65,8 @@ services:
     security_opt:
       - no-new-privileges:true
 
-  # Nextcloud Application
   app:
-    image: docker.io/library/nextcloud:27-fpm-alpine
+    image: docker.io/library/nextcloud:27-apache
     container_name: nextcloud-app
     restart: always
     depends_on:
@@ -51,14 +74,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-
     volumes:
-      - nextcloud_html:/var/www/html
-      - nextcloud_config:/var/www/html/config
-      - nextcloud_data:/var/www/html/data
-      - nextcloud_apps:/var/www/html/custom_apps
+      - nextcloud_html:/var/www/html:Z
+      - nextcloud_config:/var/www/html/config:Z
+      - nextcloud_data:/var/www/html/data:Z
+      - nextcloud_apps:/var/www/html/custom_apps:Z
       - /etc/localtime:/etc/localtime:ro
-
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -77,40 +98,29 @@ services:
       PHP_APCU_ENABLED: ${PHP_APCU_ENABLED}
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
-
+      TRUSTED_PROXIES: traefik
     networks:
       - nextcloud_network
     security_opt:
       - no-new-privileges:true
-
-  # Nginx Reverse Proxy
-  # Certbot for SSL
-  certbot:
-    image: docker.io/certbot/certbot:latest
-    container_name: nextcloud-certbot
-    restart: on-failure
-
-    volumes:
-      - ./config/ssl:/etc/letsencrypt:rw
-      - ./config/webroot:/var/www/certbot:rw
-
-    environment:
-      CERTBOT_EMAIL: ${LETSENCRYPT_EMAIL}
-      CERTBOT_DOMAIN: ${NEXTCLOUD_DOMAIN}
-
-    command: >
-      certonly --webroot
-      --webroot-path=/var/www/certbot
-      --email ${LETSENCRYPT_EMAIL}
-      --agree-tos --no-eff-email
-      -d ${NEXTCLOUD_DOMAIN}
-      -d www.${NEXTCLOUD_DOMAIN}
-      --quiet
-
-    networks:
-      - nextcloud_network
-    security_opt:
-      - no-new-privileges:true
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nextcloud.rule=Host(`${NEXTCLOUD_DOMAIN}`)
+      - traefik.http.routers.nextcloud.entrypoints=websecure
+      - traefik.http.routers.nextcloud.tls.certresolver=letsencrypt
+      - traefik.http.services.nextcloud.loadbalancer.server.port=80
+      - traefik.http.middlewares.nextcloud-headers.headers.stsSeconds=31536000
+      - traefik.http.middlewares.nextcloud-headers.headers.stsIncludeSubdomains=true
+      - traefik.http.middlewares.nextcloud-headers.headers.stsPreload=true
+      - traefik.http.middlewares.nextcloud-headers.headers.customFrameOptionsValue=SAMEORIGIN
+      - traefik.http.middlewares.nextcloud-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.nextcloud-headers.headers.browserXssFilter=true
+      - traefik.http.middlewares.nextcloud-headers.headers.customResponseHeaders.Permissions-Policy=geolocation=(),microphone=(),camera=()
+      - traefik.http.middlewares.nextcloud-headers.headers.customResponseHeaders.Referrer-Policy=no-referrer-when-downgrade
+      - traefik.http.middlewares.nextcloud-dav.redirectregex.regex=^https?://([^/]+)/\.well-known/(card|cal)dav
+      - traefik.http.middlewares.nextcloud-dav.redirectregex.replacement=https://$${1}/remote.php/dav/
+      - traefik.http.middlewares.nextcloud-compress.compress=true
+      - traefik.http.routers.nextcloud.middlewares=nextcloud-headers,nextcloud-dav,nextcloud-compress
 
 networks:
   nextcloud_network:
@@ -123,3 +133,4 @@ volumes:
   nextcloud_config:
   nextcloud_data:
   nextcloud_apps:
+  traefik_certs:

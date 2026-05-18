@@ -111,15 +111,12 @@ class LogAnalyzer:
             ],
             'docs': ['SECURITY_FIXES.md', 'docs/SECURITY.md']
         },
-        r'certbot.*renewal.*failed|renewal.*skipped': {
             'severity': SeverityLevel.WARNING,
             'title': 'Certbot SSL Renewal Failed',
             'suggestions': [
-                'Check Certbot container logs: docker logs <certbot-container>',
                 'Verify domain DNS is properly configured',
                 'Check Let\'s Encrypt rate limits (50 per domain/week)',
                 'Ensure webroot path is correct for WebRoot validation',
-                'Run manual renewal: docker exec <certbot> certbot renew --dry-run',
             ],
             'docs': ['SECURITY_FIXES.md']
         },

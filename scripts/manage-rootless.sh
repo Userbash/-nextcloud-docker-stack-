@@ -40,7 +40,6 @@ ${BLUE}CONTAINER MANAGEMENT:${NC}
 
 ${BLUE}LOGS:${NC}
   logs          Show all logs (follow mode)
-  logs <name>   Show logs for service (db, redis, app, traefik, certbot)
 
 ${BLUE}OPERATIONS:${NC}
   backup        Run backup manually

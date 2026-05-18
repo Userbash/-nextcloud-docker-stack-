@@ -209,13 +209,13 @@ docker network inspect nextcloud_default
 ### Issue: Nextcloud Web Interface Unavailable
 
 **Symptoms**:
-- Nginx shows error or blank page
+- traefik shows error or blank page
 - Browser times out or shows 502/503
 - HTTPS certificate warnings
 
 **Diagnosis**:
 ```bash
-# Test Nginx
+# Test traefik
 docker exec nextcloud-web-1 traefik -t
 
 # Test PHP-FPM
@@ -230,7 +230,7 @@ docker exec nextcloud-web-1 curl -v http://localhost/status.php
 
 **Solutions**:
 
-1. **Nginx configuration error**
+1. **traefik configuration error**
    ```bash
    docker exec nextcloud-web-1 traefik -t
    docker logs nextcloud-web-1
@@ -391,7 +391,6 @@ echo | openssl s_client -servername nextcloud.example.com -connect localhost:443
    openssl x509 -enddate -noout -in config/ssl/fullchain.pem
    
    # Renew with Certbot
-   docker exec certbot certbot renew --force-renewal
    ```
 
 2. **Certificate not found**
@@ -430,8 +429,6 @@ echo | openssl s_client -servername nextcloud.example.com -connect localhost:443
 
 1. **Test renewal (dry-run)**
    ```bash
-   docker exec certbot certbot renew --dry-run
-   docker logs certbot | tail -50
    ```
 
 2. **Check domain configuration**
@@ -443,7 +440,6 @@ echo | openssl s_client -servername nextcloud.example.com -connect localhost:443
    dig nextcloud.example.com
    
    # Verify from container
-   docker exec certbot nslookup nextcloud.example.com
    ```
 
 3. **Check rate limits**
@@ -462,7 +458,6 @@ echo | openssl s_client -servername nextcloud.example.com -connect localhost:443
 
 5. **Manual renewal**
    ```bash
-   docker exec certbot certbot certonly --webroot \
      -w /var/www/html \
      -d nextcloud.example.com \
      --force-renewal
@@ -789,16 +784,16 @@ docker-compose restart nextcloud-web-1
 docker exec nextcloud-web-1 php-fpm -t
 ```
 
-### Nginx Issues
+### traefik Issues
 
-**Nginx errors**:
+**traefik errors**:
 ```bash
 docker logs nextcloud-web-1
 docker exec nextcloud-web-1 traefik -t
 docker exec nextcloud-web-1 curl -v http://localhost
 ```
 
-**Fix Nginx**:
+**Fix traefik**:
 ```bash
 # Reload config
 docker exec nextcloud-web-1 traefik -s reload
@@ -1043,7 +1038,6 @@ curl -k https://localhost:8443/status.php
 
 **Diagnosis**:
 ```bash
-docker-compose logs certbot
 ```
 
 Common causes:
@@ -1172,7 +1166,6 @@ Podman never needs to guess:
 | `redis:7-alpine` | `docker.io/library/redis:7-alpine` |
 | `nextcloud:27-fpm-alpine` | `docker.io/library/nextcloud:27-fpm-alpine` |
 | `traefik:1.25-alpine` | `docker.io/library/traefik:1.25-alpine` |
-| `certbot/certbot:latest` | `docker.io/certbot/certbot:latest` |
 
 **Security note**: Do **not** work around this error by running containers with
 `--privileged`, disabling SELinux/AppArmor, or using `chmod 777` on data

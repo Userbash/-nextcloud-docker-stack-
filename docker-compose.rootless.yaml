@@ -97,15 +97,6 @@ services:
 
   # Nginx Reverse Proxy
   # Certbot for SSL
-  certbot:
-    image: docker.io/certbot/certbot:latest
-    container_name: nextcloud-certbot-rootless
-    restart: on-failure
-
-    volumes:
-      - ./config/ssl:/etc/letsencrypt:Z
-      - ./config/webroot:/var/www/certbot:Z
-
     environment:
       CERTBOT_EMAIL: ${LETSENCRYPT_EMAIL}
       CERTBOT_DOMAIN: ${NEXTCLOUD_DOMAIN}

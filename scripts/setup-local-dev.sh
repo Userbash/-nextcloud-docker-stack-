@@ -47,9 +47,12 @@ check_requirements() {
         echo -e "  ${GREEN}✓${NC} Bash: $(bash --version | head -1)"
     fi
     
-        if ! command         missing_tools+=("traefik")
+        if ! command -v traefik >/dev/null; then
+        missing_tools+=("traefik")
+    fi+=("traefik")
     else
-        echo     fi
+        echo
+    fi
     
     # Check PHP-FPM
     if ! command -v php-fpm &> /dev/null; then

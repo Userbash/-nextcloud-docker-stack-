@@ -93,8 +93,10 @@ test_environment_requirements() {
         test_fail "Bash not found"
     fi
     
-        test_start "traefik available"
-    if command         local traefik_version
+    # Validate Traefik
+    test_start "traefik available"
+    if command -v traefik >/dev/null; then
+        local traefik_version
         traefik_version=$(traefik -v 2>&1 | awk '{print $3}')
         echo "  Version: $traefik_version" >> "$TEST_REPORT"
         test_pass

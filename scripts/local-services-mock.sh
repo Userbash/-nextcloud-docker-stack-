@@ -103,10 +103,10 @@ start_all() {
         echo -e "  ${YELLOW}⊗${NC} PHP-FPM not installed (skipped)"
     fi
     
-        if command         start_service "traefik (port 8080)" \
-            "traefik             "ps aux | grep -q '[n]ginx'"
+    if command -v traefik >/dev/null; then
+        start_service "Traefik (port 8080)" "true"
     else
-        echo -e "  ${YELLOW}⊗${NC} traefik not installed (skipped)"
+        echo -e "  ${YELLOW}⊗${NC} Traefik not installed (skipped)"
     fi
     
     echo ""

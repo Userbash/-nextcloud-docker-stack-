@@ -129,8 +129,6 @@ docker-compose logs -f traefik
 
 3. Revoke and renew the SSL certificate:
    ```bash
-   docker-compose exec certbot certbot revoke -d your-domain.com
-   docker-compose exec certbot certbot certonly -d your-domain.com
    ```
 
 ## Quick checklist
