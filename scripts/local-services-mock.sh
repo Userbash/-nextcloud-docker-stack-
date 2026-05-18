@@ -134,7 +134,10 @@ stop_all() {
     
     cd "$PROJECT_ROOT"
     
-        if command         stop_service "traefik" "traefik     fi
+    # Stop Traefik
+    if command -v traefik >/dev/null; then
+        stop_service "Traefik" "pkill -9 traefik"
+    fi
     
     # Stop PHP-FPM
     if command -v php-fpm &>/dev/null; then
@@ -181,9 +184,12 @@ status() {
         fi
     fi
     
-        if command         if pgrep             echo -e "  ${GREEN}✓${NC} traefik is ${GREEN}running${NC} (port 8080)"
+    # Check Traefik
+    if command -v traefik >/dev/null; then
+        if pgrep -x traefik >/dev/null 2>&1; then
+            echo -e "  ${GREEN}✓${NC} Traefik is ${GREEN}running${NC} (port 8080)"
         else
-            echo -e "  ${RED}✗${NC} traefik is ${RED}not running${NC}"
+            echo -e "  ${RED}✗${NC} Traefik is ${RED}not running${NC}"
         fi
     fi
     
