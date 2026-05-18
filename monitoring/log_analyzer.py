@@ -107,7 +107,7 @@ class LogAnalyzer:
                 'Verify SSL certificate files exist in config/ssl/',
                 'Check certificate permissions: ls -la config/ssl/',
                 'Ensure certificate is not expired: openssl x509 -text -in config/ssl/cert.pem',
-                'Check nginx SSL configuration in nginx/nginx.conf',
+                'Check traefik SSL configuration in traefik/traefik.conf',
             ],
             'docs': ['SECURITY_FIXES.md', 'docs/SECURITY.md']
         },
@@ -124,25 +124,23 @@ class LogAnalyzer:
             'docs': ['SECURITY_FIXES.md']
         },
 
-        # Nginx errors
-        r'nginx.*upstream.*connect\(\) failed': {
+                r'traefik.*upstream.*connect\(\) failed': {
             'severity': SeverityLevel.ERROR,
-            'title': 'Nginx Backend Connection Failed',
+            'title': 'traefik Backend Connection Failed',
             'suggestions': [
                 'Verify PHP-FPM container is running: docker ps | grep php',
-                'Check nginx upstream configuration',
+                'Check traefik upstream configuration',
                 'Review PHP-FPM socket or TCP port settings',
                 'Check Docker network connectivity',
             ],
             'docs': ['TROUBLESHOOTING.md']
         },
-        r'nginx.*permission denied': {
+        r'traefik.*permission denied': {
             'severity': SeverityLevel.ERROR,
-            'title': 'Nginx Permission Denied',
+            'title': 'traefik Permission Denied',
             'suggestions': [
                 'Check file permissions in volumes: ls -la /srv/nextcloud',
-                'Verify nginx user has correct permissions (www-data/nginx)',
-                'Check docker-compose volume permissions and ownership',
+                'Verify traefik user has correct permissions (www                'Check docker-compose volume permissions and ownership',
             ],
             'docs': ['PROJECT_CLEANUP_REPORT.md']
         },

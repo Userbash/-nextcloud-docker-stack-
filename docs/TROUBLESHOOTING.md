@@ -216,7 +216,7 @@ docker network inspect nextcloud_default
 **Diagnosis**:
 ```bash
 # Test Nginx
-docker exec nextcloud-web-1 nginx -t
+docker exec nextcloud-web-1 traefik -t
 
 # Test PHP-FPM
 docker exec nextcloud-web-1 php-fpm -t
@@ -232,7 +232,7 @@ docker exec nextcloud-web-1 curl -v http://localhost/status.php
 
 1. **Nginx configuration error**
    ```bash
-   docker exec nextcloud-web-1 nginx -t
+   docker exec nextcloud-web-1 traefik -t
    docker logs nextcloud-web-1
    docker-compose restart nextcloud-web-1
    ```
@@ -710,13 +710,13 @@ nslookup nextcloud.example.com
    telnet YOUR_SERVER_IP 443
    ```
 
-3. **Configure nginx properly**
+3. **Configure traefik properly**
    ```bash
-   # Check nginx config
-   docker exec nextcloud-web-1 nginx -t
+   # Check traefik config
+   docker exec nextcloud-web-1 traefik -t
    
    # Review server_name in config
-   grep "server_name" nginx/nginx.conf
+   grep "server_name" traefik/traefik.conf
    ```
 
 ### Issue: DNS Resolution Fails
@@ -794,14 +794,14 @@ docker exec nextcloud-web-1 php-fpm -t
 **Nginx errors**:
 ```bash
 docker logs nextcloud-web-1
-docker exec nextcloud-web-1 nginx -t
+docker exec nextcloud-web-1 traefik -t
 docker exec nextcloud-web-1 curl -v http://localhost
 ```
 
 **Fix Nginx**:
 ```bash
 # Reload config
-docker exec nextcloud-web-1 nginx -s reload
+docker exec nextcloud-web-1 traefik -s reload
 
 # Restart if needed
 docker-compose restart nextcloud-web-1
@@ -1171,7 +1171,7 @@ Podman never needs to guess:
 | `postgres:16-alpine` | `docker.io/library/postgres:16-alpine` |
 | `redis:7-alpine` | `docker.io/library/redis:7-alpine` |
 | `nextcloud:27-fpm-alpine` | `docker.io/library/nextcloud:27-fpm-alpine` |
-| `nginx:1.25-alpine` | `docker.io/library/nginx:1.25-alpine` |
+| `traefik:1.25-alpine` | `docker.io/library/traefik:1.25-alpine` |
 | `certbot/certbot:latest` | `docker.io/certbot/certbot:latest` |
 
 **Security note**: Do **not** work around this error by running containers with

@@ -95,7 +95,6 @@ bash scripts/backup.sh --restore /path/to/backup.tar.gz
 ## Container security
 
 - Everything runs without root
-- Only Nginx is exposed on the network
 - Database doesn't talk to the outside world
 - Services have CPU and memory limits
 

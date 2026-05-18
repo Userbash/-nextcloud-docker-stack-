@@ -34,8 +34,7 @@ cd "$project_dir"
 check_service "PostgreSQL" "docker-compose exec -T db pg_isready -U postgres 2>/dev/null"
 check_service "Redis" "docker-compose exec -T redis redis-cli ping 2>/dev/null"
 check_service "Nextcloud" "docker-compose ps app 2>/dev/null | grep -q Up"
-check_service "Nginx" "docker-compose ps nginx 2>/dev/null | grep -q Up"
-
+check_service "traefik" "docker
 echo ""
 echo "📊 Summary"
 echo "=========="

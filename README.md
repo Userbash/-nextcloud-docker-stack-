@@ -14,7 +14,7 @@ Architecture overview:
 - **Nextcloud** — The core cloud platform and web interface.
 - **PostgreSQL** — A robust, production-ready relational database.
 - **Redis** — In-memory caching for faster load times and session management.
-- **Nginx** — Web server serving as a reverse proxy.
+- **Traefik** — Web server serving as a reverse proxy.
 - **Certbot** — Automated SSL certificate provisioning and renewal via Let's Encrypt.
 
 ---
@@ -46,7 +46,7 @@ For deployment on a VPS or home server with a registered domain:
 bash setup.sh --domain cloud.yourdomain.com --email you@yourdomain.com
 ```
 
-This command configures Nginx for production and automatically procures a live SSL certificate from Let's Encrypt.
+This command configures Traefik for production and automatically procures a live SSL certificate from Let's Encrypt.
 
 ---
 

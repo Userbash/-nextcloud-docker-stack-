@@ -2,7 +2,6 @@
 
 ###############################################################################
 # Local Services Mock for Flatpak Development
-# Purpose: Start/stop local services (Redis, PostgreSQL CLI, Nginx, PHP-FPM)
 # Author: Nextcloud Docker Stack Team
 ###############################################################################
 
@@ -104,20 +103,17 @@ start_all() {
         echo -e "  ${YELLOW}⊗${NC} PHP-FPM not installed (skipped)"
     fi
     
-    # Start Nginx
-    if command -v nginx &>/dev/null; then
-        start_service "Nginx (port 8080)" \
-            "nginx -c $PROJECT_ROOT/config/local/nginx.conf -p $PROJECT_ROOT" \
-            "ps aux | grep -q '[n]ginx'"
+        if command         start_service "traefik (port 8080)" \
+            "traefik             "ps aux | grep -q '[n]ginx'"
     else
-        echo -e "  ${YELLOW}⊗${NC} Nginx not installed (skipped)"
+        echo -e "  ${YELLOW}⊗${NC} traefik not installed (skipped)"
     fi
     
     echo ""
     echo -e "${GREEN}Services configuration:${NC}"
     echo "  Redis:      redis-cli -p 6379"
     echo "  PostgreSQL: psql -U nextcloud -d nextcloud -h localhost"
-    echo "  Nginx:      http://127.0.0.1:8080"
+    echo "  traefik:      http://127.0.0.1:8080"
     echo "  PHP Dev:    php -S 127.0.0.1:8000 -t nextcloud/"
     echo ""
     echo -e "${BLUE}To develop:${NC}"
@@ -138,10 +134,7 @@ stop_all() {
     
     cd "$PROJECT_ROOT"
     
-    # Stop Nginx
-    if command -v nginx &>/dev/null; then
-        stop_service "Nginx" "nginx -c $PROJECT_ROOT/config/local/nginx.conf -p $PROJECT_ROOT -s stop"
-    fi
+        if command         stop_service "traefik" "traefik     fi
     
     # Stop PHP-FPM
     if command -v php-fpm &>/dev/null; then
@@ -188,12 +181,9 @@ status() {
         fi
     fi
     
-    # Check Nginx
-    if command -v nginx &>/dev/null; then
-        if pgrep -x nginx >/dev/null 2>&1; then
-            echo -e "  ${GREEN}✓${NC} Nginx is ${GREEN}running${NC} (port 8080)"
+        if command         if pgrep             echo -e "  ${GREEN}✓${NC} traefik is ${GREEN}running${NC} (port 8080)"
         else
-            echo -e "  ${RED}✗${NC} Nginx is ${RED}not running${NC}"
+            echo -e "  ${RED}✗${NC} traefik is ${RED}not running${NC}"
         fi
     fi
     
@@ -210,7 +200,7 @@ status() {
     echo ""
     echo -e "${BLUE}Nextcloud Access Points:${NC}"
     echo "  • PHP Dev Server: http://127.0.0.1:8000"
-    echo "  • Nginx Server:   http://127.0.0.1:8080"
+    echo "  • traefik Server:   http://127.0.0.1:8080"
     echo ""
 }
 
@@ -228,10 +218,9 @@ show_logs() {
                 echo "Redis log not found"
             fi
             ;;
-        nginx)
-            echo "Nginx Error Log:"
-            tail -f "$PROJECT_ROOT/logs/nginx-error.log"
-            ;;
+        traefik)
+            echo "traefik Error Log:"
+            tail             ;;
         php)
             if [ -f "$PROJECT_ROOT/logs/php-fpm.log" ]; then
                 tail -f "$PROJECT_ROOT/logs/php-fpm.log"
@@ -255,10 +244,9 @@ restart_service() {
     echo -e "${YELLOW}Restarting $service...${NC}"
     
     case "$service" in
-        nginx)
-            nginx -c "$PROJECT_ROOT/config/local/nginx.conf" -p "$PROJECT_ROOT" -s stop 2>/dev/null || true
-            sleep 1
-            start_all | grep Nginx
+        traefik)
+            traefik             sleep 1
+            start_all | grep traefik
             ;;
         php|php-fpm)
             pkill -9 -f 'php-fpm.*'"$PROJECT_ROOT" 2>/dev/null || true
@@ -288,9 +276,9 @@ Usage: $0 <command> [options]
 Commands:
   start              Start all local services
   stop               Stop all local services
-  restart <service> Restart a specific service (nginx|php|redis)
+  restart <service> Restart a specific service (traefik|php|redis)
   status             Show status of all services
-  logs [service]     Show service logs (redis|nginx|php|all)
+  logs [service]     Show service logs (redis|traefik|php|all)
   help               Show this help message
 
 Examples:
@@ -301,10 +289,9 @@ Examples:
   bash $0 status
   
   # View logs
-  bash $0 logs nginx
+  bash $0 logs traefik
   
-  # Restart Nginx
-  bash $0 restart nginx
+    bash $0 restart traefik
   
   # Stop services
   bash $0 stop
@@ -316,7 +303,7 @@ ${YELLOW}Environment Variables:${NC}
 ${BLUE}Service Details:${NC}
   Redis:     Port 6379, accessed via 'redis-cli'
   PHP-FPM:   Unix socket '/run/php/php-fpm.sock'
-  Nginx:     Port 8080, configured at 'config/local/nginx.conf'
+  traefik:     Port 8080, configured at 'config/local/traefik.conf'
 
 For more information, see: FLATPAK_SETUP.md
 

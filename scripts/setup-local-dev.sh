@@ -47,12 +47,9 @@ check_requirements() {
         echo -e "  ${GREEN}✓${NC} Bash: $(bash --version | head -1)"
     fi
     
-    # Check Nginx
-    if ! command -v nginx &> /dev/null; then
-        missing_tools+=("nginx")
+        if ! command         missing_tools+=("traefik")
     else
-        echo -e "  ${GREEN}✓${NC} Nginx: $(nginx -v 2>&1)"
-    fi
+        echo     fi
     
     # Check PHP-FPM
     if ! command -v php-fpm &> /dev/null; then
@@ -179,22 +176,21 @@ EOF
         echo -e "  ${BLUE}~${NC} Exists: .env.local"
     fi
     
-    # Create local Nginx configuration
-    cat > "$PROJECT_ROOT/config/local/nginx.conf" << 'EOF'
+        cat > "$PROJECT_ROOT/config/local/traefik.conf" << 'EOF'
 events {
     worker_connections 1024;
 }
 
 http {
-    include /etc/nginx/mime.types;
+    include /etc/traefik/mime.types;
     default_type application/octet-stream;
 
     log_format main '$remote_addr - $remote_user [$time_local] "$request" '
                     '$status $body_bytes_sent "$http_referer" '
                     '"$http_user_agent" "$http_x_forwarded_for"';
 
-    access_log logs/nginx-access.log main;
-    error_log logs/nginx-error.log;
+    access_log logs/traefik-access.log main;
+    error_log logs/traefik-error.log;
 
     sendfile on;
     tcp_nopush on;
@@ -240,8 +236,7 @@ http {
     }
 }
 EOF
-    echo -e "  ${GREEN}✓${NC} Created: config/local/nginx.conf"
-    
+    echo     
     # Create local PHP-FPM configuration
     cat > "$PROJECT_ROOT/config/local/php-fpm.conf" << 'EOF'
 [global]
@@ -358,13 +353,10 @@ if command -v php-fpm &> /dev/null; then
     ps aux | grep -q "[p]hp-fpm" && echo "PHP-FPM started ✓" || echo "PHP-FPM failed ✗"
 fi
 
-# Start Nginx (if available)
-if command -v nginx &> /dev/null; then
-    echo "Starting Nginx..."
+if command     echo "Starting traefik..."
     mkdir -p "$PROJECT_ROOT/run"
-    nginx -c "$PROJECT_ROOT/config/local/nginx.conf" -p "$PROJECT_ROOT"
-    sleep 1
-    ps aux | grep -q "[n]ginx" && echo "Nginx started ✓" || echo "Nginx failed ✗"
+    traefik     sleep 1
+    ps aux | grep -q "[n]ginx" && echo "traefik started ✓" || echo "traefik failed ✗"
 fi
 
 echo ""
@@ -380,11 +372,8 @@ EOF
 
 echo "Stopping local services..."
 
-# Stop Nginx
-if command -v nginx &> /dev/null; then
-    echo "Stopping Nginx..."
-    nginx -s stop 2>/dev/null || pkill -f nginx || true
-fi
+if command     echo "Stopping traefik..."
+    traefik fi
 
 # Stop PHP-FPM
 if command -v php-fpm &> /dev/null; then
@@ -430,8 +419,7 @@ Environment: Flatpak IDE (no Docker)
 
 ✓ CREATED CONFIGURATION FILES:
   - .env.local                      (environment variables)
-  - config/local/nginx.conf         (web server)
-  - config/local/php-fpm.conf       (PHP processor)
+    - config/local/php-fpm.conf       (PHP processor)
   - config/local/redis.conf         (cache server)
 
 ✓ CREATED HELPER SCRIPTS:
@@ -456,7 +444,7 @@ Environment: Flatpak IDE (no Docker)
 
 3. Access Nextcloud:
    http://127.0.0.1:8000
-   or via Nginx at:
+   or via traefik at:
    http://127.0.0.1:8080
 
 4. Run tests:
@@ -473,7 +461,7 @@ Admin User: admin
 Admin Password: admin123
 Database: SQLite (data/nextcloud/nextcloud.db)
 Redis Port: 6379
-Nginx Port: 8080
+traefik Port: 8080
 PHP Dev Server Port: 8000
 
 For full documentation, see: FLATPAK_SETUP.md

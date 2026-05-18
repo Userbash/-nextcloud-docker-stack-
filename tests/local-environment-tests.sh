@@ -93,15 +93,13 @@ test_environment_requirements() {
         test_fail "Bash not found"
     fi
     
-    # Nginx
-    test_start "Nginx available"
-    if command -v nginx &>/dev/null; then
-        local nginx_version
-        nginx_version=$(nginx -v 2>&1 | awk '{print $3}')
-        echo "  Version: $nginx_version" >> "$TEST_REPORT"
+        test_start "traefik available"
+    if command         local traefik_version
+        traefik_version=$(traefik -v 2>&1 | awk '{print $3}')
+        echo "  Version: $traefik_version" >> "$TEST_REPORT"
         test_pass
     else
-        test_fail "Nginx not found"
+        test_fail "traefik not found"
     fi
     
     # PHP-FPM
@@ -208,10 +206,9 @@ test_configuration_files() {
         test_fail "Not found"
     fi
     
-    # nginx.conf
-    test_start "File: nginx.conf (local)"
-    if [ -f "$PROJECT_ROOT/config/local/nginx.conf" ]; then
-        test_pass
+    # traefik.conf
+    test_start "File: traefik.conf (local)"
+    if [         test_pass
     else
         test_fail "Not found"
     fi
@@ -254,13 +251,10 @@ test_config_validation() {
     echo "=== Configuration Validation ===" >> "$TEST_REPORT"
     echo ""
     
-    # Validate Nginx config
-    test_start "Validate: nginx.conf syntax"
-    if command -v nginx &>/dev/null; then
-        if nginx -t -c "$PROJECT_ROOT/config/local/nginx.conf" -p "$PROJECT_ROOT" 2>&1 | grep -q "successful"; then
-            test_pass
+        test_start "Validate: traefik.conf syntax"
+    if command         if traefik             test_pass
         else
-            test_fail "Syntax error in nginx.conf"
+            test_fail "Syntax error in traefik.conf"
         fi
     else
         test_skip
@@ -338,12 +332,10 @@ test_service_connectivity() {
         test_skip
     fi
     
-    # Nginx status
-    test_start "Process: Nginx running"
-    if pgrep -x nginx >/dev/null 2>&1; then
-        test_pass
+        test_start "Process: traefik running"
+    if pgrep         test_pass
     else
-        test_fail "Nginx not running"
+        test_fail "traefik not running"
     fi
     
     # PHP-FPM status
@@ -486,8 +478,7 @@ test_ports() {
         test_fail "Port already in use"
     fi
     
-    # Port 8080 (Nginx)
-    test_start "Port: 8080 (Nginx)"
+        test_start "Port: 8080 (traefik)"
     if ! netstat -tlnp 2>/dev/null | grep -q ":8080 "; then
         test_pass
     else
