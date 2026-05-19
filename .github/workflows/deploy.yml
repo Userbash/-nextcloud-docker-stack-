@@ -1,0 +1,56 @@
+name: Deploy Nextcloud Stack
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            INSTALL_DIR="/home/nextcloud-stack/nextcloud-docker-stack"
+            
+            sudo mkdir -p "$INSTALL_DIR"
+            sudo chown -R nextcloud-stack:nextcloud-stack /home/nextcloud-stack
+            
+            cd "$INSTALL_DIR" || exit 1
+            sudo -u nextcloud-stack git fetch origin main
+            sudo -u nextcloud-stack git reset --hard origin/main
+
+            cat > .env << EOT
+            POSTGRES_DB=${{ secrets.DB_NAME }}
+            POSTGRES_USER=${{ secrets.DB_USER }}
+            POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD }}
+            POSTGRES_HOST=${{ secrets.DB_HOST }}
+            NEXTCLOUD_ADMIN_USER=${{ secrets.ADMIN_USER }}
+            NEXTCLOUD_ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+            NEXTCLOUD_DOMAIN=${{ secrets.DOMAIN }}
+            NEXTCLOUD_TRUSTED_DOMAINS=${{ secrets.TRUSTED_DOMAINS }}
+            LETSENCRYPT_EMAIL=${{ secrets.EMAIL }}
+            OVERWRITEPROTOCOL=${{ secrets.OVERWRITEPROTOCOL }}
+            PHP_MEMORY_LIMIT=${{ secrets.PHP_MEMORY_LIMIT }}
+            PHP_UPLOAD_MAX_FILESIZE=${{ secrets.PHP_UPLOAD_MAX_FILESIZE }}
+            PHP_POST_MAX_SIZE=${{ secrets.PHP_POST_MAX_SIZE }}
+            PHP_MAX_EXECUTION_TIME=${{ secrets.PHP_MAX_EXECUTION_TIME }}
+            PHP_OPCACHE_ENABLE=${{ secrets.PHP_OPCACHE_ENABLE }}
+            PHP_OPCACHE_MEMORY_CONSUMPTION=${{ secrets.PHP_OPCACHE_MEMORY_CONSUMPTION }}
+            PHP_APCU_ENABLED=${{ secrets.PHP_APCU_ENABLED }}
+            REDIS_HOST=${{ secrets.REDIS_HOST }}
+            REDIS_PORT=${{ secrets.REDIS_PORT }}
+            EOT
+            sudo chown nextcloud-stack:nextcloud-stack .env
+            sudo chmod 600 .env
+
+            sudo -u nextcloud-stack bash setup.sh --domain ${{ secrets.DOMAIN }} --email ${{ secrets.EMAIL }} --rootless
+            sudo -u nextcloud-stack bash scripts/health-check.sh

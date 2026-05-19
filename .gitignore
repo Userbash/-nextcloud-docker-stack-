@@ -86,3 +86,7 @@ vendor/
 temp/
 tmp/
 *.tmp
+
+# Specifically added for secret cleanup
+secrets_tmp.txt
+secrets_tmp_2.txt
