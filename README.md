@@ -1,77 +1,85 @@
-# ☁️ Nextcloud Stack (Docker / Podman)
+# ☁️ Nextcloud Stack: The No-Nonsense Self-Hosting Guide
 
-This repository provides a streamlined setup for deploying a personal or organizational Nextcloud instance. It includes all necessary configurations and scripts to spin up a fully functional cloud environment quickly, without tedious manual setup.
+Setting up a personal cloud shouldn't be a weekend-long ordeal of debugging PHP extensions and fighting with SSL configs. I built this stack to automate the boring parts so you can get straight to the "cloud" part. It’s optimized for **Podman** (rootless) and **Docker**, focusing on high security and modern network performance.
 
-The stack supports standard Docker, as well as Podman in rootless mode for enhanced security.
-
----
-
-## 🛠 Features and Architecture
-
-A barebones Nextcloud installation requires configuring a database, caching, and SSL certificates manually. This stack integrates these components into a unified, ready-to-deploy environment.
-
-Architecture overview:
-- **Nextcloud** — The core cloud platform and web interface.
-- **PostgreSQL** — A robust, production-ready relational database.
-- **Redis** — In-memory caching for faster load times and session management.
-- **Traefik** — Web server serving as a reverse proxy.
-- **Certbot** — Automated SSL certificate provisioning and renewal via Let's Encrypt.
+![Nextcloud Dashboard](docs/screenshots/nextcloud_dashboard.png)
+*The end result: A fast, secure, and modern Nextcloud instance running in a dark theme.*
 
 ---
 
-## 🚀 Quick Start (Local Development)
+## Why this stack?
 
-To deploy the stack locally for testing:
+I've seen too many "simple" setups that cut corners on security or performance. This project is my attempt to do it right. Here’s what makes it different:
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/suraiya8239/nextcloud-docker-stack.git
-   cd nextcloud-docker-stack
-   ```
-2. Run the startup script:
-   ```bash
-   bash setup.sh --dev
-   ```
-
-Wait a few minutes and open your browser at: `http://localhost:8081`.  
-The script will automatically create essential directories, generate an `.env` file with secure default credentials, and start the containers.
+*   **Speed without the overhead:** We use **Redis** for session handling and file locking, which makes the interface feel snappy even on modest hardware.
+*   **Security by default:** No old TLS versions here. I've locked it down to **TLS 1.3** and enabled **HSTS** (Strict Transport Security) right out of the box. 
+*   **Modern Web Ready:** It fully supports **HTTP/3 (QUIC)** and **HTTP/2**. If your browser supports it, your cloud will use the fastest available protocol.
+*   **Privacy-First:** Designed for **Rootless Podman**. This means even if a container is compromised, the attacker still doesn't have root access to your host system.
+*   **Zero-Effort Proxy:** Traefik v3 handles all the routing and automatically grabs SSL certificates from Let's Encrypt for you.
 
 ---
 
-## 🌍 Production Deployment
+## Technical Architecture
 
-For deployment on a VPS or home server with a registered domain:
+I’ve integrated four core services that work together as a single unit:
 
+1.  **Traefik v3:** Acts as the gateway. It listens for incoming traffic and routes it to the right place while providing a layer of security.
+2.  **Nextcloud:** The application layer (Apache/PHP). Optimized to handle heavy file uploads and multi-user sync.
+3.  **PostgreSQL 16:** A solid, production-grade database to store all your file metadata and user settings.
+4.  **Redis 7:** The lightning-fast memory cache that keeps everything running smoothly.
+
+![Traefik Infrastructure](docs/screenshots/traefik_dashboard.png)
+*Behind the scenes: The Traefik dashboard confirms our routes are healthy and the secure entrypoints are active.*
+
+---
+
+## 🚀 Getting Started
+
+You can have this running on your local machine for testing in about 3 minutes.
+
+### 1. Prerequisites
+Make sure you have either `docker` or `podman` installed. On Linux, Podman is highly recommended for its security benefits.
+
+### 2. Deployment
 ```bash
-bash setup.sh --domain cloud.yourdomain.com --email you@yourdomain.com
+# Clone the repo
+git clone https://github.com/suraiya8239/nextcloud-docker-stack.git
+cd nextcloud-docker-stack
+
+# Run the automated setup
+bash setup.sh --dev
 ```
 
-This command configures Traefik for production and automatically procures a live SSL certificate from Let's Encrypt.
+### 3. Access
+*   **HTTPS (Secure):** [https://localhost:8443](https://localhost:8443)
+*   **HTTP (Local):** [http://localhost:8080](http://localhost:8080)
+*   **Login:** `admin`
+*   **Password:** *Check your auto-generated `.env` file for the password.*
+
+*Note: Since it's a local setup, the SSL certificate is self-signed. Your browser will complain—just click "Advanced" and proceed. It’s safe.*
 
 ---
 
-## 📚 Documentation
+## 🌍 Moving to Production
 
-Detailed guides are available to help you configure and maintain the stack:
+When you're ready to put this on a real server with a domain:
 
-- [Rootless Podman Setup](docs/ROOTLESS_PODMAN.md) — *Instructions for running the stack without root privileges to maximize host security.*
-- [Local CI & Testing](docs/DEVELOPMENT_CI.md) — *Details on our automated testing pipeline and how to run it locally.*
-- [Security Guidelines](docs/SECURITY.md) — *Best practices for passwords, port management, and hardening.*
-- [Quick Reference](docs/QUICK_REFERENCE.md) — *Common commands for viewing logs, managing backups, and restarting containers.*
-- [Troubleshooting](docs/TROUBLESHOOTING.md) — *Solutions for common deployment issues.*
+```bash
+bash setup.sh --domain yourcloud.com --email you@email.com
+```
 
----
-
-## 💻 System Requirements
-- **Minimum:** 2 GB RAM, 1 CPU core.
-- **Recommended:** 4+ GB RAM.
-- **OS:** Any modern Linux distribution (Ubuntu, Debian, Fedora, CentOS).
-- **Dependencies:** `docker` and `docker-compose` (or `podman` with `podman-compose`).
+The script will reconfigure Traefik to use real Let's Encrypt certificates. Ensure ports 80 and 443 are open on your firewall.
 
 ---
 
-## 🤝 Contributing
-Contributions are welcome! Please open an Issue or submit a Pull Request if you find a bug or have a feature request. Before pushing, please run the local linters (see the CI documentation) to ensure your code meets the repository's formatting standards.
+## 🛠 Maintenance
 
-License: MIT.
-ос
+I’ve included a few helper scripts in the `scripts/` folder to make your life easier:
+*   `health-check.sh`: Checks if all containers are healthy and responding.
+*   `backup.sh`: Dumps the database and configs into the `backups/` folder.
+*   `update.sh`: Pulls the newest images and restarts the stack without losing data.
+
+---
+
+## License
+MIT. Use it, break it, fix it, share it.

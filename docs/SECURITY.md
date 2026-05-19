@@ -41,6 +41,23 @@ Generate one with:
 openssl rand -base64 32
 ```
 
+## Modern Web Protocols
+
+This stack is built for the 2026 web. We don't just use "standard" HTTPS; we enforce modern security:
+
+*   **TLS 1.3 Only:** We've disabled older TLS versions (1.0, 1.1, 1.2) to prevent downgrade attacks. All encrypted traffic uses the latest standard.
+*   **HTTP/3 (QUIC):** Enabled by default in Traefik. It provides faster handshakes and better performance over unreliable networks.
+*   **HSTS (Strict Transport Security):** Configured to tell browsers to *only* ever talk to your cloud via HTTPS.
+
+Check your protocols with curl:
+```bash
+# Check for HTTP/2 and TLS 1.3
+curl -v -k https://localhost:8443 2>&1 | grep -E "ALPN|SSL connection using"
+
+# Check for HTTP/3 advertisement
+curl -I -k https://localhost:8443 | grep alt-svc
+```
+
 ## SSL/TLS certificates
 
 Let's Encrypt is automatic and free. Set it up and forget it. Make sure private keys are 600:

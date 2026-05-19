@@ -68,7 +68,7 @@ services:
       - nextcloud_config:/var/www/html/config:Z
       - nextcloud_data:/var/www/html/data:Z
       - nextcloud_apps:/var/www/html/custom_apps:Z
-      - /etc/localtime:/etc/localtime:ro,Z
+      - /etc/localtime:/etc/localtime:ro
 
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
@@ -91,16 +91,6 @@ services:
 
     networks:
       - nextcloud_network
-    
-    security_opt:
-      - no-new-privileges:true
-
-  # Nginx Reverse Proxy
-  # Certbot for SSL
-    environment:
-      CERTBOT_EMAIL: ${LETSENCRYPT_EMAIL}
-      CERTBOT_DOMAIN: ${NEXTCLOUD_DOMAIN}
-
 networks:
   nextcloud_network:
     driver: bridge

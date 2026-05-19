@@ -4,6 +4,17 @@
 .env.*.local
 .env.backup
 
+# Local execution shims and session-specific bins
+bin/
+
+# Traefik dynamic config
+config/traefik/dynamic/
+
+# Python cache
+__pycache__/
+.pytest_cache/
+*.pyc
+
 # Docker/Podman volumes (runtime data)
 db_data/
 redis_data/
