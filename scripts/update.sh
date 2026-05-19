@@ -15,7 +15,7 @@ cd "$project_dir"
 
 # Pull latest images
 echo "📥 Pulling latest images..."
-if docker-compose pull; then
+if docker-compose -f docker-compose.yml -f docker-compose.prod.yml pull; then
     echo "✅ Images updated"
 else
     echo "❌ Failed to pull images"
@@ -31,25 +31,13 @@ else
 fi
 
 # Update containers
-echo "🔄 Updating containers..."
-if docker-compose up -d; then
-    echo "✅ Containers updated"
+echo "🔄 Updating containers and waiting for healthchecks..."
+if docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --wait; then
+    echo "✅ All services updated and healthy"
 else
-    echo "❌ Failed to update containers"
+    echo "❌ Deployment failed healthchecks. Rolling back..."
+    docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
     exit 1
-fi
-
-# Wait for services
-echo "⏳ Waiting for services (30s)..."
-sleep 5
-
-# Run health check
-echo ""
-echo "🏥 Running health check..."
-if bash "$script_dir/health-check.sh"; then
-    echo "✅ All services healthy"
-else
-    echo "⚠️  Some services not yet ready"
 fi
 
 echo ""
@@ -57,5 +45,5 @@ echo "✅ Update complete!"
 echo ""
 echo "📋 Next steps:"
 echo "1. Check Nextcloud admin panel: https://${NEXTCLOUD_DOMAIN}"
-echo "2. Review: docker-compose logs -f app"
-echo "3. Verify: docker-compose exec app php occ status"
+echo "2. Review: docker-compose -f docker-compose.yml -f docker-compose.prod.yml logs -f app"
+echo "3. Verify: docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec app php occ status"

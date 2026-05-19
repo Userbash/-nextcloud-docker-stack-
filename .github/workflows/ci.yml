@@ -3,9 +3,9 @@ name: Local Checks & Lints
 
 'on':
   push:
-    branches: [ "main", "master", "dev" ]
+    branches: [ "production", "dev" ]
   pull_request:
-    branches: [ "main", "master" ]
+    branches: [ "production" ]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
@@ -13,15 +13,18 @@ env:
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: true
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Run ShellCheck
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y shellcheck
-          WORKSPACE_DIR="${GITHUB_WORKSPACE:-$PWD}"
+          WORKSPACE_DIR="${GITHUB_WORKSPACE}"
           cd "$WORKSPACE_DIR"
           # Exclude data and .git to avoid permission noise in local act runs.
           find . -type d \( -name 'data' -o -name '.git' \) -prune -o -type f -name '*.sh' -print0 2>/dev/null | xargs -0 -r shellcheck
@@ -30,28 +33,17 @@ jobs:
         run: |
           sudo apt-get update -qq || true
           sudo apt-get install -y yamllint
-          WORKSPACE_DIR="${GITHUB_WORKSPACE:-$PWD}"
+          WORKSPACE_DIR="${GITHUB_WORKSPACE}"
           cd "$WORKSPACE_DIR"
           bash scripts/validate-yaml.sh
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup PHP
+        uses: shivammathur/setup-php@c541c155fee3b4d55216515b13bc4ec882103f8c # v2.32.0
         with:
-          python-version: "3.10"
-
-      - name: Install Python Linters
+          php-version: '8.2'
+          
+      - name: Lint PHP Configs
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8 black
-
-      - name: Check Python formatting
-        run: |
-          WORKSPACE_DIR="${GITHUB_WORKSPACE:-$PWD}"
+          WORKSPACE_DIR="${GITHUB_WORKSPACE}"
           cd "$WORKSPACE_DIR"
-          find . -type d \( -name '.git' -o -name 'data' \) -prune -o -type f -name '*.py' -print0 2>/dev/null | xargs -0 -r black --check || echo "Black found formatting issues, but continuing..."
-
-      - name: Lint Python with flake8
-        run: |
-          WORKSPACE_DIR="${GITHUB_WORKSPACE:-$PWD}"
-          cd "$WORKSPACE_DIR"
-          find . -type d \( -name '.git' -o -name 'data' \) -prune -o -type f -name '*.py' -print0 2>/dev/null | xargs -0 -r flake8 || echo "Flake8 found issues, but continuing..."
+          find . -name "*.php" -print0 2>/dev/null | xargs -0 -r -n1 php -l

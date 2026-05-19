@@ -1,75 +1,44 @@
----
-version: '3.9'
+version: '3.8'
 
 services:
-  # PostgreSQL Database
   db:
-    image: docker.io/library/postgres:16-alpine
-    container_name: nextcloud-db-rootless
+    image: docker.io/library/postgres:16-alpine@sha256:16bc17c64a573ef34162af9298258d1aec548232985b33ed7b1eac33ba35c229
+    container_name: nextcloud-db
     restart: always
-    
     volumes:
-      - db_data:/var/lib/postgresql/data:Z  # :Z for rootless SELinux context
-    
+      - db_data:/var/lib/postgresql/data:Z
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 10s
       timeout: 5s
       retries: 5
-    
     networks:
       - nextcloud_network
-    
     security_opt:
       - no-new-privileges:true
 
-  # Redis Cache
-  redis:
-    image: docker.io/library/redis:7-alpine
-    container_name: nextcloud-redis-rootless
-    restart: always
-    
-    command: redis-server --appendonly yes
-    
-    volumes:
-      - redis_data:/data:Z  # :Z for rootless
-    
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    
-    networks:
-      - nextcloud_network
-    
-    security_opt:
-      - no-new-privileges:true
-
-  # Nextcloud Application
   app:
-    image: docker.io/library/nextcloud:27-fpm-alpine
-    container_name: nextcloud-app-rootless
+    image: docker.io/library/nextcloud:27-apache@sha256:cbbe16adf3df9246c49d1faade9788b6c792d64b09a76c3372ee2b49294ac6a7
+    container_name: nextcloud-app
     restart: always
-    
     depends_on:
       db:
         condition: service_healthy
-      redis:
-        condition: service_healthy
-    
     volumes:
       - nextcloud_html:/var/www/html:Z
       - nextcloud_config:/var/www/html/config:Z
       - nextcloud_data:/var/www/html/data:Z
       - nextcloud_apps:/var/www/html/custom_apps:Z
       - /etc/localtime:/etc/localtime:ro
-
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:80/status.php || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_DB: ${POSTGRES_DB}
@@ -86,25 +55,18 @@ services:
       PHP_OPCACHE_ENABLE: ${PHP_OPCACHE_ENABLE}
       PHP_OPCACHE_MEMORY_CONSUMPTION: ${PHP_OPCACHE_MEMORY_CONSUMPTION}
       PHP_APCU_ENABLED: ${PHP_APCU_ENABLED}
-      REDIS_HOST: ${REDIS_HOST}
-      REDIS_PORT: ${REDIS_PORT}
-
     networks:
       - nextcloud_network
+    security_opt:
+      - no-new-privileges:true
+
 networks:
   nextcloud_network:
     driver: bridge
 
 volumes:
   db_data:
-    driver: local
-  redis_data:
-    driver: local
   nextcloud_html:
-    driver: local
   nextcloud_config:
-    driver: local
   nextcloud_data:
-    driver: local
   nextcloud_apps:
-    driver: local

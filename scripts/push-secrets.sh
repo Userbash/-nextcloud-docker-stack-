@@ -1,42 +1,25 @@
 #!/bin/bash
-# Script for automating secret deployment to GitHub from .env file
+# Script for automating secret generation and deployment to GitHub
 # Usage: ./scripts/push-secrets.sh
 
-# Resolve script directory to handle paths correctly
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-
-REPO="Userbash/nextcloud-docker-stack"
 ENV_FILE="$PROJECT_ROOT/.env"
-TEMPLATE_FILE="$PROJECT_ROOT/.env.template"
+REPO="Userbash/nextcloud-docker-stack"
 
-if ! command -v gh &> /dev/null; then
-    echo "Error: GitHub CLI (gh) not found. Please install it."
+# 1. Ensure .env exists
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Error: .env file not found. Please create it from .env.example before pushing secrets."
     exit 1
 fi
 
-if [ ! -f "$ENV_FILE" ]; then
-    if [ -f "$TEMPLATE_FILE" ]; then
-        echo "Warning: $ENV_FILE not found. Creating it from $TEMPLATE_FILE..."
-        cp "$TEMPLATE_FILE" "$ENV_FILE"
-        echo "Please edit $ENV_FILE with your actual secrets and run this script again."
-        exit 1
-    else
-        echo "Error: Neither .env nor .env.template found in $PROJECT_ROOT."
-        exit 1
-    fi
-fi
+# 2. Load variables securely
+while IFS='=' read -r key value; do
+    [[ "$key" =~ ^#.* ]] || [[ -z "$key" ]] && continue
+    export "$key"="$value"
+done < "$ENV_FILE"
 
-echo "Pushing secrets to $REPO from $ENV_FILE..."
-
-# Export variables from .env
-set -o allexport
-source "$ENV_FILE"
-set +o allexport
-
-# List of secrets to push - these match the GitHub secrets names used in deploy.yml
-# We use a mapping if local var names differ from secret names.
-# Here we ensure they match exactly as expected in deploy.yml.
+# 3. Comprehensive Secret Map covering ALL env vars needed for deployment
 declare -A SECRETS_MAP=(
   ["POSTGRES_DB"]="DB_NAME"
   ["POSTGRES_USER"]="DB_USER"
@@ -57,17 +40,19 @@ declare -A SECRETS_MAP=(
   ["PHP_APCU_ENABLED"]="PHP_APCU_ENABLED"
   ["REDIS_HOST"]="REDIS_HOST"
   ["REDIS_PORT"]="REDIS_PORT"
+  ["REDIS_PASSWORD"]="REDIS_PASSWORD"
 )
 
+# 4. Push Secrets
 for key in "${!SECRETS_MAP[@]}"; do
-  secret_name="${SECRETS_MAP[$key]}"
-  val="${!key}"
-  if [ -z "$val" ]; then
-    echo "Warning: Variable $key is empty, skipping."
-    continue
-  fi
-  echo "Setting secret $secret_name from $key..."
-  echo "$val" | gh secret set "$secret_name" --repo "$REPO"
+    secret_name="${SECRETS_MAP[$key]}"
+    val=$(eval echo "\$$key")
+    if [ -z "$val" ]; then
+        echo "Warning: Variable $key is empty."
+        continue
+    fi
+    echo "Setting $secret_name to GitHub..."
+    echo "$val" | gh secret set "$secret_name" --repo "$REPO"
 done
 
-echo "✅ All secrets pushed successfully."
+echo "✅ All secrets and deployment configurations fully synced."

@@ -304,45 +304,32 @@ if $SKIP_START; then
 fi
 
 # Choose the right compose file
-COMPOSE_FILE="docker-compose.yaml"
-if $ROOTLESS && [ -f "$SCRIPT_DIR/docker-compose.rootless.yaml" ]; then
-    COMPOSE_FILE="docker-compose.rootless.yaml"
-    info "Using rootless compose file: $COMPOSE_FILE"
+if $DEV_MODE; then
+    COMPOSE_ARGS=()
+    info "Using local development override (docker-compose.override.yml)"
+else
+    COMPOSE_ARGS=(-f docker-compose.yml -f docker-compose.prod.yml)
+    info "Using production compose stack (docker-compose.yml + docker-compose.prod.yml)"
 fi
 
 cd "$SCRIPT_DIR"
 info "Pulling latest images (this may take a minute on first run)..."
-$COMPOSE_CMD -f "$COMPOSE_FILE" pull --quiet 2>/dev/null || warn "Image pull failed — will use cached images"
+$COMPOSE_CMD "${COMPOSE_ARGS[@]}" pull --quiet 2>/dev/null || warn "Image pull failed — will use cached images"
 
-info "Starting containers in the background..."
-$COMPOSE_CMD -f "$COMPOSE_FILE" up -d
-
-# ===========================================================================
-# WAIT FOR CONTAINERS TO BECOME HEALTHY
-# ===========================================================================
-echo ""
-info "Waiting for services to become healthy (up to 60 seconds)..."
-MAX_WAIT=60
-WAITED=0
-SLEEP=5
-
-while [ $WAITED -lt $MAX_WAIT ]; do
-    # Count running containers
-    UP=$($COMPOSE_CMD -f "$COMPOSE_FILE" ps 2>/dev/null | grep -c " Up\| running" || true)
-    if [ "$UP" -ge 3 ]; then
-        break
-    fi
-    sleep $SLEEP
-    WAITED=$((WAITED + SLEEP))
-    echo -n "."
-done
-echo ""
+info "Starting containers and waiting for healthchecks..."
+if $COMPOSE_CMD "${COMPOSE_ARGS[@]}" up -d --wait; then
+    success "All services started and reported healthy."
+else
+    error "Deployment failed healthchecks. Rolling back..."
+    $COMPOSE_CMD "${COMPOSE_ARGS[@]}" down
+    exit 1
+fi
 
 # ===========================================================================
 # SHOW FINAL STATUS
 # ===========================================================================
 echo ""
-$COMPOSE_CMD -f "$COMPOSE_FILE" ps
+$COMPOSE_CMD "${COMPOSE_ARGS[@]}" ps
 
 # ---------------------------------------------------------------------------
 # Print access URL
